@@ -1,0 +1,36 @@
+.hero {
+  text-align: center;
+  margin: 80px auto;
+  max-width: 900px;
+}
+
+.hero h1 {
+  font-size: 46px;
+  margin-bottom: 20px;
+}
+
+.hero-desc {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 80px auto;
+}
+
+.card {
+  background: rgba(255,255,255,0.15);
+  padding: 40px 20px;
+  border-radius: 20px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.card .icon {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
