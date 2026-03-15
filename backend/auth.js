@@ -18,7 +18,8 @@ export async function registerUser(data) {
 
   await db.query(
     `INSERT INTO users (name, email, phone, address, password, role_id, status)
-     VALUES ($1, $2, $3, $4, $5, $6) 'RETURING *",
+     VALUES ($1, $2, $3, $4, $5, $6, 'PENDING')
+     RETURNING *`,
     [name, email, phone, address, password, roleRow.id]
   );
 
