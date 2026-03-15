@@ -4,46 +4,46 @@ import db from "./db.js";
 
 const PORT = process.env.PORT || 5000;
 
-/**
- * Check database connection before starting server
- */
 async function startServer() {
   try {
-    // Test DB connection
     await db.query("SELECT 1");
     console.log("✅ Database connected successfully");
 
-    // Create server ONLY if DB is connected
     const server = http.createServer((req, res) => {
-
-      // ✅ CORS headers
+      // CORS Headers
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-      // Handle preflight request
       if (req.method === "OPTIONS") {
-        res.writeHead(200);
+        res.writeHead(204); // 204 No Content preflight ke liye better hai
         res.end();
         return;
       }
 
-      let body = "";
-
-      req.on("data", chunk => body += chunk);
+      // ✅ Better way to handle body using Buffers
+      let chunks = [];
+      req.on("data", (chunk) => chunks.push(chunk));
 
       req.on("end", async () => {
         try {
-          await handleRequest(req, res, body);
+          const completeBody = Buffer.concat(chunks).toString();
+          // handleRequest ko call karein
+          await handleRequest(req, res, completeBody);
         } catch (err) {
           console.error("❌ Request handling error:", err.message);
-
-          res.writeHead(500, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({
-            error: "Internal server error",
-            message: err.message
-          }));
+          if (!res.writableEnded) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+          }
         }
+      });
+
+      // Handle stream errors
+      req.on("error", (err) => {
+        console.error("Stream Error:", err);
+        res.statusCode = 400;
+        res.end();
       });
     });
 
@@ -52,11 +52,7 @@ async function startServer() {
     });
 
   } catch (err) {
-    // DB connection failed
-    console.error("❌ DATABASE CONNECTION FAILED");
-    console.error("Reason:", err.message);
-    console.error("👉 Server NOT started");
-
+    console.error("❌ DATABASE CONNECTION FAILED:", err.message);
     process.exit(1);
   }
 }
