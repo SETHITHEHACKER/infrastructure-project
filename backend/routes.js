@@ -12,7 +12,16 @@ export async function handleRequest(req, res, body) {
     return res.end();
   }
 
+  // ---------------- ROOT ROUTE ----------------
+  if (req.url === "/" && req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({
+      message: "Backend running successfully 🚀"
+    }));
+  }
+
   try {
+
     // =================================================
     // REGISTER
     // =================================================
@@ -25,7 +34,7 @@ export async function handleRequest(req, res, body) {
     }
 
     // =================================================
-    // LOGIN (BLOCK PENDING / BLOCKED)
+    // LOGIN
     // =================================================
     if (req.url === "/api/login" && req.method === "POST") {
       const { email, password } = JSON.parse(body);
@@ -85,7 +94,7 @@ export async function handleRequest(req, res, body) {
     }
 
     // =================================================
-    // ADMIN – UPDATE USER STATUS
+    // UPDATE USER STATUS
     // =================================================
     if (req.url.startsWith("/api/user/") && req.url.endsWith("/status") && req.method === "PUT") {
       const userId = req.url.split("/")[3];
@@ -118,7 +127,7 @@ export async function handleRequest(req, res, body) {
     }
 
     // =================================================
-    // SANITIZATION – PENDING SUBMISSIONS
+    // PENDING SUBMISSIONS
     // =================================================
     if (req.url === "/api/pending-submissions" && req.method === "GET") {
       const [submissions] = await db.query(`
@@ -136,7 +145,7 @@ export async function handleRequest(req, res, body) {
     }
 
     // =================================================
-    // SANITIZATION – UPDATE SUBMISSION STATUS
+    // UPDATE SUBMISSION STATUS
     // =================================================
     if (req.url.startsWith("/api/validate-submission/") && req.method === "POST") {
       const id = req.url.split("/")[3];
@@ -158,14 +167,14 @@ export async function handleRequest(req, res, body) {
     }
 
     // =================================================
-    // SANITIZATION – RAISE ISSUE
+    // RAISE ISSUE
     // =================================================
     if (req.url === "/api/raise-issue" && req.method === "POST") {
       const { title, description } = JSON.parse(body);
 
       await db.query(
         "INSERT INTO issues (worker_id, title, description) VALUES (3, ?, ?)",
-        [title, description] // worker_id hardcoded for now
+        [title, description]
       );
 
       res.writeHead(201);
@@ -173,7 +182,7 @@ export async function handleRequest(req, res, body) {
     }
 
     // =================================================
-    // CITIZEN – STATS
+    // CITIZEN STATS
     // =================================================
     if (req.url === "/api/citizen/stats" && req.method === "GET") {
       const [[stats]] = await db.query(`
@@ -189,14 +198,14 @@ export async function handleRequest(req, res, body) {
     }
 
     // =================================================
-    // CITIZEN – SUBMIT DAMAGE
+    // SUBMIT WASTE
     // =================================================
     if (req.url === "/api/submit-waste" && req.method === "POST") {
       const { wasteType, address } = JSON.parse(body);
 
       await db.query(
         "INSERT INTO submissions (user_id, wasteType, address) VALUES (2, ?, ?)",
-        [wasteType, address] // test citizen
+        [wasteType, address]
       );
 
       res.writeHead(201);
