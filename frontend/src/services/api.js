@@ -1,38 +1,21 @@
-// ================= BASE URL =================
+// ✅ Render ka URL yahan ek baar define karo
+const API_BASE = "https://infrastructure-project-2.onrender.com";
 
-const API_BASE_URL = "https://infrastructure-project-2.onrender.com";
-
-// ================= AUTH =================
-
-// Login
 export async function loginUser(email, password) {
-  const res = await fetch(`${API_BASE_URL}/api/login`, {
+  const res = await fetch(`${API_BASE}/api/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email,
-      password
-    })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
   });
 
   const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Login failed");
-  }
-
-  // save user in localStorage
-  localStorage.setItem("user", JSON.stringify(data));
-
+  if (!res.ok) throw new Error(data.message);
   return data;
 }
 
-
-// Register
 export async function registerUser(payload) {
-  const res = await fetch(`${API_BASE_URL}/api/register`, {
+  // ✅ Localhost hata kar API_BASE use kiya
+  const response = await fetch(`${API_BASE}/api/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -40,157 +23,101 @@ export async function registerUser(payload) {
     body: JSON.stringify(payload)
   });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Registration failed");
-  }
-
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Registration failed");
   return data;
 }
 
-
-// Logout
-export function logoutUser() {
-  localStorage.removeItem("user");
-}
-
-
-// ================= TOKEN HELPER =================
-
-function getToken() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  return user?.token;
-}
-
-
-// ================= CITIZEN =================
-
-
-// Citizen Dashboard Stats
 export async function getCitizenStats() {
-  const res = await fetch(`${API_BASE_URL}/api/citizen/stats`, {
-    headers: {
-      Authorization: "Bearer " + getToken()
-    }
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/citizen/stats`, {
+    headers: { Authorization: "Bearer " + user.token }
   });
-
   return res.json();
 }
 
-
-// Submit Damage / Waste Report
 export async function submitDamage(payload) {
-  const res = await fetch(`${API_BASE_URL}/api/submit-waste`, {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/submit-waste`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer " + getToken()
+      Authorization: "Bearer " + user.token
     },
     body: JSON.stringify(payload)
   });
-
   return res.json();
 }
 
-
-// Get Pending Submissions
 export async function getPendingSubmissions() {
-  const res = await fetch(`${API_BASE_URL}/api/pending-submissions`, {
-    headers: {
-      Authorization: "Bearer " + getToken()
-    }
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/pending-submissions`, {
+    headers: { Authorization: "Bearer " + user.token }
   });
-
   return res.json();
 }
 
-
-// Validate Submission
 export async function validateSubmission(id, action) {
-  const res = await fetch(
-    `${API_BASE_URL}/api/validate-submission/${id}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + getToken()
-      },
-      body: JSON.stringify({ action })
-    }
-  );
-
-  return res.json();
-}
-
-
-// Raise New Issue
-export async function raiseIssue(payload) {
-  const res = await fetch(`${API_BASE_URL}/api/raise-issue`, {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/validate-submission/${id}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer " + getToken()
+      Authorization: "Bearer " + user.token
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ action })
   });
-
   return res.json();
 }
 
+export async function raiseIssue(payload) {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/raise-issue`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + user.token
+    },
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
 
 // ================= ADMIN =================
 
-
-// Admin Dashboard Stats
 export async function getAdminStats() {
-  const res = await fetch(`${API_BASE_URL}/api/admin/stats`, {
-    headers: {
-      Authorization: "Bearer " + getToken()
-    }
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/admin/stats`, {
+    headers: { Authorization: "Bearer " + user.token }
   });
-
   return res.json();
 }
 
-
-// Get All Users
 export async function getAllUsers() {
-  const res = await fetch(`${API_BASE_URL}/api/users`, {
-    headers: {
-      Authorization: "Bearer " + getToken()
-    }
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/users`, {
+    headers: { Authorization: "Bearer " + user.token }
   });
-
   return res.json();
 }
 
-
-// Update User Status
 export async function updateUserStatus(userId, status) {
-  const res = await fetch(
-    `${API_BASE_URL}/api/user/${userId}/status`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + getToken()
-      },
-      body: JSON.stringify({ status })
-    }
-  );
-
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/user/${userId}/status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + user.token
+    },
+    body: JSON.stringify({ status })
+  });
   return res.json();
 }
 
-
-// Get All Issues (Admin)
 export async function getAdminIssues() {
-  const res = await fetch(`${API_BASE_URL}/api/admin/issues`, {
-    headers: {
-      Authorization: "Bearer " + getToken()
-    }
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${API_BASE}/api/admin/issues`, {
+    headers: { Authorization: "Bearer " + user.token }
   });
-
   return res.json();
 }

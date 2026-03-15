@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://infrastructure-project-2.onrender.com";
 
 function ManageUsers() {
   const [users, setUsers] = useState([]);
