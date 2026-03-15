@@ -2,7 +2,7 @@ import http from "http";
 import { handleRequest } from "./routes.js";
 import db from "./db.js";
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 /**
  * Check database connection before starting server
@@ -15,9 +15,23 @@ async function startServer() {
 
     // Create server ONLY if DB is connected
     const server = http.createServer((req, res) => {
+
+      // ✅ CORS headers
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+      // Handle preflight request
+      if (req.method === "OPTIONS") {
+        res.writeHead(200);
+        res.end();
+        return;
+      }
+
       let body = "";
 
       req.on("data", chunk => body += chunk);
+
       req.on("end", async () => {
         try {
           await handleRequest(req, res, body);
@@ -34,7 +48,7 @@ async function startServer() {
     });
 
     server.listen(PORT, () => {
-      console.log(`🚀 Backend running on http://localhost:${PORT}`);
+      console.log(`🚀 Backend running on port ${PORT}`);
     });
 
   } catch (err) {
@@ -43,7 +57,7 @@ async function startServer() {
     console.error("Reason:", err.message);
     console.error("👉 Server NOT started");
 
-    process.exit(1); // Stop the app
+    process.exit(1);
   }
 }
 
